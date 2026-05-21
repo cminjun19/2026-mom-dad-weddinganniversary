@@ -21,10 +21,6 @@ body{
 
   background:#f5f5f5;
 
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
   font-family:Arial, sans-serif;
 }
 
@@ -88,7 +84,6 @@ body{
 
   display:flex;
   flex-wrap:wrap;
-  align-content:flex-start;
 
   gap:10px;
 
@@ -104,20 +99,22 @@ body{
   width:60px;
   height:60px;
 
-  border:1px solid rgba(0,0,0,0.08);
+  flex-shrink:0;
 
-  cursor:grab;
+  border:1px solid rgba(0,0,0,0.08);
 
   background-image:url("family.png");
 
   background-size:600% 400%;
 
-  transition:0.2s;
-
   box-shadow:
     0 5px 10px rgba(0,0,0,0.08);
 
-  flex-shrink:0;
+  cursor:grab;
+
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 }
 
 .piece:hover{
@@ -128,12 +125,17 @@ body{
   opacity:0.5;
 }
 
-/* 고정된 퍼즐 */
+/* 슬롯 안에 들어간 퍼즐 */
 
 .piece.fixed{
-  border:none !important;
-  box-shadow:none !important;
+  width:100% !important;
+  height:100% !important;
+
+  border:none;
+  box-shadow:none;
+
   transform:none !important;
+
   cursor:default;
 }
 
@@ -225,30 +227,6 @@ body{
   color:#666;
 }
 
-/* 모바일 */
-
-@media(max-width:900px){
-
-  body{
-    overflow:auto;
-  }
-
-  .container{
-    flex-direction:column;
-    padding:20px;
-  }
-
-  .frame{
-    width:95vw;
-  }
-
-  .pieces-panel{
-    width:100%;
-    height:250px;
-  }
-
-}
-
 </style>
 </head>
 
@@ -260,7 +238,7 @@ body{
 
   <div class="frame" id="frame">
 
-    <!-- 빛 효과 -->
+    <!-- 빛 -->
 
     <div class="flash"></div>
 
@@ -299,13 +277,13 @@ let correct = 0;
 
 /* 슬롯 생성 */
 
-for(let y = 0; y < rows; y++){
+for(let y=0; y<rows; y++){
 
-  for(let x = 0; x < cols; x++){
+  for(let x=0; x<cols; x++){
 
     const slot = document.createElement("div");
 
-    slot.classList.add("slot");
+    slot.className = "slot";
 
     const w = 100 / cols;
     const h = 100 / rows;
@@ -338,20 +316,11 @@ for(let y = 0; y < rows; y++){
 
           slot.appendChild(piece);
 
-          /* 슬롯에 딱 맞춤 */
-
-          piece.style.width = "100%";
-          piece.style.height = "100%";
-
-          /* 튀어나오는 요소 제거 */
-
           piece.classList.add("fixed");
 
           piece.draggable = false;
 
           correct++;
-
-          /* 마지막 퍼즐 완성 */
 
           if(correct === total){
 
@@ -373,13 +342,13 @@ for(let y = 0; y < rows; y++){
 
 /* 퍼즐 생성 */
 
-for(let y = 0; y < rows; y++){
+for(let y=0; y<rows; y++){
 
-  for(let x = 0; x < cols; x++){
+  for(let x=0; x<cols; x++){
 
     const piece = document.createElement("div");
 
-    piece.classList.add("piece");
+    piece.className = "piece";
 
     const index = y * cols + x;
 
@@ -389,22 +358,16 @@ for(let y = 0; y < rows; y++){
 
     piece.draggable = true;
 
-    /* 퍼즐 이미지 위치 */
-
     piece.style.backgroundPosition =
       `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
 
-    /* 드래그 시작 */
-
     piece.addEventListener("dragstart", e=>{
+
+      e.dataTransfer.setData("text/plain", piece.id);
 
       piece.classList.add("dragging");
 
-      e.dataTransfer.setData("text", piece.id);
-
     });
-
-    /* 드래그 종료 */
 
     piece.addEventListener("dragend", ()=>{
 
@@ -418,7 +381,7 @@ for(let y = 0; y < rows; y++){
 
 }
 
-/* 완성 연출 */
+/* reveal */
 
 function reveal(){
 
