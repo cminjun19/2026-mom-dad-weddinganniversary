@@ -110,6 +110,8 @@ body{
 
   background-size:600% 400%;
 
+  background-repeat:no-repeat;
+
   transition:0.2s;
 
   box-shadow:
@@ -307,10 +309,12 @@ for(let y=0; y<rows; y++){
 
     slot.dataset.index = index;
 
+    /* 드래그 허용 */
     slot.addEventListener("dragover", e=>{
       e.preventDefault();
     });
 
+    /* 드롭 */
     slot.addEventListener("drop", e=>{
 
       e.preventDefault();
@@ -374,16 +378,22 @@ for(let y=0; y<rows; y++){
 
     piece.dataset.index = index;
 
-    piece.draggable = true;
+    /* ⭐⭐⭐ 핵심 드래그 기능 */
+
+    piece.setAttribute("draggable","true");
 
     /* 이미지 위치 */
 
     piece.style.backgroundPosition =
       `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
 
+    /* 드래그 시작 */
+
     piece.addEventListener("dragstart", e=>{
 
       piece.classList.add("dragging");
+
+      e.dataTransfer.effectAllowed = "move";
 
       e.dataTransfer.setData(
         "text/plain",
@@ -391,6 +401,8 @@ for(let y=0; y<rows; y++){
       );
 
     });
+
+    /* 드래그 종료 */
 
     piece.addEventListener("dragend", ()=>{
 
