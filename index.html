@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Wedding Anniversary Puzzle</title>
+<title>Puzzle Test</title>
 
 <style>
 
@@ -17,82 +17,81 @@
 body{
   width:100vw;
   height:100vh;
-  overflow:hidden;
 
   background:#f5f5f5;
 
-  font-family:Arial, sans-serif;
-}
-
-.container{
-  width:100%;
-  height:100%;
-
   display:flex;
-  justify-content:space-between;
+  justify-content:center;
   align-items:center;
 
-  padding:40px;
+  font-family:sans-serif;
+}
+
+/* 전체 */
+
+.container{
+  display:flex;
   gap:40px;
+  align-items:center;
 }
 
 /* 액자 */
 
-.frame{
-  width:70vw;
-  max-width:1100px;
-
-  aspect-ratio:16/9;
-
-  position:relative;
+.board{
+  width:960px;
+  height:540px;
 
   background:white;
 
-  border:2px solid rgba(0,0,0,0.08);
+  position:relative;
 
-  overflow:hidden;
+  border:2px solid #ddd;
+
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  grid-template-rows:repeat(4,1fr);
 
   box-shadow:
-    0 10px 40px rgba(0,0,0,0.08);
+    0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* 슬롯 */
 
 .slot{
-  position:absolute;
+  border:1px solid #e5e5e5;
 
-  border:1px solid rgba(0,0,0,0.05);
-
-  overflow:hidden;
+  position:relative;
 }
 
-/* 퍼즐창 */
+/* 퍼즐 창 */
 
-.pieces-panel{
-  width:320px;
-  height:90vh;
+.panel{
+  width:300px;
+  height:700px;
 
   background:white;
 
   border-radius:30px;
 
-  padding:20px;
-
-  border:1px solid rgba(0,0,0,0.08);
-
   position:relative;
 
+  overflow:hidden;
+
+  border:1px solid #ddd;
+
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.05);
+    0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* 퍼즐 조각 */
 
 .piece{
-  width:60px;
-  height:60px;
+  width:120px;
+  height:135px;
 
   position:absolute;
+
+  cursor:grab;
 
   border:1px solid rgba(0,0,0,0.08);
 
@@ -105,8 +104,6 @@ body{
   box-shadow:
     0 5px 10px rgba(0,0,0,0.08);
 
-  cursor:grab;
-
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -115,31 +112,35 @@ body{
 }
 
 .piece:hover{
-  transform:scale(1.05);
+  transform:scale(1.03);
 }
 
 .piece.dragging{
+  opacity:0.7;
   cursor:grabbing;
-  z-index:1000;
+  z-index:9999;
 }
 
-/* 슬롯에 들어간 조각 */
+/* 고정된 퍼즐 */
 
 .piece.fixed{
-  width:100% !important;
-  height:100% !important;
+  width:100%;
+  height:100%;
+
+  left:0 !important;
+  top:0 !important;
 
   border:none;
   box-shadow:none;
 
-  transform:none !important;
-
   cursor:default;
+
+  transform:none !important;
 }
 
 /* 완성 사진 */
 
-.full-photo{
+.final-photo{
   position:absolute;
   inset:0;
 
@@ -150,12 +151,12 @@ body{
 
   opacity:0;
 
-  transition:2s ease;
+  transition:2s;
 
-  z-index:2;
+  pointer-events:none;
 }
 
-.frame.revealed .full-photo{
+.board.complete .final-photo{
   opacity:1;
 }
 
@@ -169,58 +170,36 @@ body{
     radial-gradient(
       circle,
       rgba(255,255,255,1) 0%,
-      rgba(255,255,255,0.8) 30%,
-      rgba(255,255,255,0.2) 60%,
+      rgba(255,255,255,0.7) 40%,
       transparent 100%
     );
 
   opacity:0;
 
-  transform:scale(0.8);
-
   pointer-events:none;
-
-  z-index:5;
 }
 
-.frame.active .flash{
-  animation:flashAnim 1.5s ease;
-  filter:blur(20px);
+.board.flash-active .flash{
+  animation:flash 1.5s ease;
 }
 
-@keyframes flashAnim{
+@keyframes flash{
 
   0%{
     opacity:0;
     transform:scale(0.8);
   }
 
-  30%{
+  40%{
     opacity:1;
     transform:scale(1.1);
   }
 
   100%{
     opacity:0;
-    transform:scale(1.4);
+    transform:scale(1.5);
   }
 
-}
-
-.message{
-  position:absolute;
-
-  bottom:-70px;
-
-  left:50%;
-
-  transform:translateX(-50%);
-
-  font-size:16px;
-
-  letter-spacing:2px;
-
-  color:#666;
 }
 
 </style>
@@ -230,33 +209,29 @@ body{
 
 <div class="container">
 
-  <!-- 액자 -->
+  <!-- 퍼즐판 -->
 
-  <div class="frame" id="frame">
+  <div class="board" id="board">
 
     <div class="flash"></div>
 
     <img
       src="family.png"
-      class="full-photo"
+      class="final-photo"
     >
-
-    <div class="message">
-      Put the memories back together
-    </div>
 
   </div>
 
-  <!-- 퍼즐창 -->
+  <!-- 오른쪽 퍼즐창 -->
 
-  <div class="pieces-panel" id="piecesPanel"></div>
+  <div class="panel" id="panel"></div>
 
 </div>
 
 <script>
 
-const frame = document.getElementById("frame");
-const panel = document.getElementById("piecesPanel");
+const board = document.getElementById("board");
+const panel = document.getElementById("panel");
 
 const cols = 6;
 const rows = 4;
@@ -265,34 +240,21 @@ const total = cols * rows;
 
 let correct = 0;
 
-/* 슬롯 생성 */
-
 const slots = [];
 
-for(let y=0; y<rows; y++){
+/* 슬롯 생성 */
 
-  for(let x=0; x<cols; x++){
+for(let i=0; i<total; i++){
 
-    const slot = document.createElement("div");
+  const slot = document.createElement("div");
 
-    slot.className = "slot";
+  slot.className = "slot";
 
-    const w = 100 / cols;
-    const h = 100 / rows;
+  slot.dataset.index = i;
 
-    slot.style.width = w + "%";
-    slot.style.height = h + "%";
+  board.appendChild(slot);
 
-    slot.style.left = x * w + "%";
-    slot.style.top = y * h + "%";
-
-    slot.dataset.index = y * cols + x;
-
-    frame.appendChild(slot);
-
-    slots.push(slot);
-
-  }
+  slots.push(slot);
 
 }
 
@@ -302,67 +264,70 @@ for(let y=0; y<rows; y++){
 
   for(let x=0; x<cols; x++){
 
+    const index = y * cols + x;
+
     const piece = document.createElement("div");
 
     piece.className = "piece";
 
-    const index = y * cols + x;
-
     piece.dataset.index = index;
 
-    /* 이미지 위치 */
+    /* 퍼즐 이미지 위치 */
 
     piece.style.backgroundPosition =
-      `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
+      `${x * 20}% ${y * 33.33}%`;
 
-    /* 초기 위치 */
+    /* 랜덤 위치 */
 
     piece.style.left =
-      Math.random() * 220 + "px";
+      Math.random() * 150 + 20 + "px";
 
     piece.style.top =
-      Math.random() * 700 + "px";
+      Math.random() * 520 + 20 + "px";
 
     panel.appendChild(piece);
 
     /* 드래그 */
 
-    let isDragging = false;
+    let dragging = false;
 
-    let offsetX, offsetY;
+    let offsetX = 0;
+    let offsetY = 0;
 
     piece.addEventListener("mousedown", e=>{
 
-      if(piece.classList.contains("fixed")) return;
+      if(piece.classList.contains("fixed"))
+        return;
 
-      isDragging = true;
+      dragging = true;
 
       piece.classList.add("dragging");
 
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
+      offsetX = e.clientX - piece.offsetLeft;
+      offsetY = e.clientY - piece.offsetTop;
 
     });
 
     document.addEventListener("mousemove", e=>{
 
-      if(!isDragging) return;
+      if(!dragging) return;
 
-      const panelRect = panel.getBoundingClientRect();
+      const panelRect =
+        panel.getBoundingClientRect();
 
       piece.style.left =
-        (e.clientX - panelRect.left - offsetX) + "px";
+        e.clientX - panelRect.left - offsetX + "px";
 
       piece.style.top =
-        (e.clientY - panelRect.top - offsetY) + "px";
+        e.clientY - panelRect.top - offsetY + "px";
 
     });
 
     document.addEventListener("mouseup", ()=>{
 
-      if(!isDragging) return;
+      if(!dragging) return;
 
-      isDragging = false;
+      dragging = false;
 
       piece.classList.remove("dragging");
 
@@ -370,17 +335,25 @@ for(let y=0; y<rows; y++){
 
       slots.forEach(slot=>{
 
-        if(slot.dataset.index !== piece.dataset.index)
+        if(slot.dataset.index != piece.dataset.index)
           return;
 
-        const slotRect = slot.getBoundingClientRect();
-        const pieceRect = piece.getBoundingClientRect();
+        if(slot.querySelector(".piece"))
+          return;
+
+        const slotRect =
+          slot.getBoundingClientRect();
+
+        const pieceRect =
+          piece.getBoundingClientRect();
 
         const centerX =
           pieceRect.left + pieceRect.width / 2;
 
         const centerY =
           pieceRect.top + pieceRect.height / 2;
+
+        /* 슬롯 안에 들어갔는지 */
 
         if(
           centerX > slotRect.left &&
@@ -394,6 +367,8 @@ for(let y=0; y<rows; y++){
           piece.classList.add("fixed");
 
           correct++;
+
+          /* 퍼즐 완성 */
 
           if(correct === total){
 
@@ -411,15 +386,15 @@ for(let y=0; y<rows; y++){
 
 }
 
-/* reveal */
+/* 완성 연출 */
 
 function reveal(){
 
-  frame.classList.add("active");
+  board.classList.add("flash-active");
 
   setTimeout(()=>{
 
-    frame.classList.add("revealed");
+    board.classList.add("complete");
 
   },500);
 
