@@ -315,9 +315,11 @@ for(let y=0; y<rows; y++){
 
       e.preventDefault();
 
-      const pieceId = e.dataTransfer.getData("text");
+      const pieceId =
+        e.dataTransfer.getData("text/plain");
 
-      const piece = document.getElementById(pieceId);
+      const piece =
+        document.getElementById(pieceId);
 
       if(piece.dataset.index === slot.dataset.index){
 
@@ -383,7 +385,10 @@ for(let y=0; y<rows; y++){
 
       piece.classList.add("dragging");
 
-      e.dataTransfer.setData("text", piece.id);
+      e.dataTransfer.setData(
+        "text/plain",
+        piece.id
+      );
 
     });
 
