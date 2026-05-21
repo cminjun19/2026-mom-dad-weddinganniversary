@@ -17,15 +17,12 @@
 body{
   width:100vw;
   height:100vh;
-
   overflow:hidden;
 
   background:#f5f5f5;
 
   font-family:Arial, sans-serif;
 }
-
-/* 전체 */
 
 .container{
   width:100%;
@@ -69,7 +66,7 @@ body{
   overflow:hidden;
 }
 
-/* 퍼즐 패널 */
+/* 퍼즐창 */
 
 .pieces-panel{
   width:320px;
@@ -83,12 +80,7 @@ body{
 
   border:1px solid rgba(0,0,0,0.08);
 
-  display:flex;
-  flex-wrap:wrap;
-
-  gap:10px;
-
-  overflow-y:auto;
+  position:relative;
 
   box-shadow:
     0 10px 30px rgba(0,0,0,0.05);
@@ -100,7 +92,7 @@ body{
   width:60px;
   height:60px;
 
-  flex-shrink:0;
+  position:absolute;
 
   border:1px solid rgba(0,0,0,0.08);
 
@@ -117,7 +109,9 @@ body{
 
   transition:
     transform 0.2s,
-    opacity 0.2s;
+    box-shadow 0.2s;
+
+  user-select:none;
 }
 
 .piece:hover{
@@ -125,17 +119,17 @@ body{
 }
 
 .piece.dragging{
-  opacity:0.5;
+  cursor:grabbing;
+  z-index:1000;
 }
 
-/* 슬롯 안에 들어간 퍼즐 */
+/* 슬롯에 들어간 조각 */
 
 .piece.fixed{
   width:100% !important;
   height:100% !important;
 
   border:none;
-
   box-shadow:none;
 
   transform:none !important;
@@ -213,8 +207,6 @@ body{
 
 }
 
-/* 문구 */
-
 .message{
   position:absolute;
 
@@ -231,30 +223,6 @@ body{
   color:#666;
 }
 
-/* 모바일 */
-
-@media(max-width:900px){
-
-  body{
-    overflow:auto;
-  }
-
-  .container{
-    flex-direction:column;
-    padding:20px;
-  }
-
-  .frame{
-    width:95vw;
-  }
-
-  .pieces-panel{
-    width:100%;
-    height:250px;
-  }
-
-}
-
 </style>
 </head>
 
@@ -266,18 +234,12 @@ body{
 
   <div class="frame" id="frame">
 
-    <!-- 빛 -->
-
     <div class="flash"></div>
-
-    <!-- 완성 사진 -->
 
     <img
       src="family.png"
       class="full-photo"
     >
-
-    <!-- 문구 -->
 
     <div class="message">
       Put the memories back together
@@ -285,7 +247,7 @@ body{
 
   </div>
 
-  <!-- 퍼즐 패널 -->
+  <!-- 퍼즐창 -->
 
   <div class="pieces-panel" id="piecesPanel"></div>
 
@@ -294,7 +256,7 @@ body{
 <script>
 
 const frame = document.getElementById("frame");
-const piecesPanel = document.getElementById("piecesPanel");
+const panel = document.getElementById("piecesPanel");
 
 const cols = 6;
 const rows = 4;
@@ -305,9 +267,11 @@ let correct = 0;
 
 /* 슬롯 생성 */
 
-for(let y = 0; y < rows; y++){
+const slots = [];
 
-  for(let x = 0; x < cols; x++){
+for(let y=0; y<rows; y++){
+
+  for(let x=0; x<cols; x++){
 
     const slot = document.createElement("div");
 
@@ -322,47 +286,114 @@ for(let y = 0; y < rows; y++){
     slot.style.left = x * w + "%";
     slot.style.top = y * h + "%";
 
+    slot.dataset.index = y * cols + x;
+
+    frame.appendChild(slot);
+
+    slots.push(slot);
+
+  }
+
+}
+
+/* 퍼즐 생성 */
+
+for(let y=0; y<rows; y++){
+
+  for(let x=0; x<cols; x++){
+
+    const piece = document.createElement("div");
+
+    piece.className = "piece";
+
     const index = y * cols + x;
 
-    slot.dataset.index = index;
+    piece.dataset.index = index;
 
-    /* 드래그 허용 */
+    /* 이미지 위치 */
 
-    slot.addEventListener("dragover", e=>{
+    piece.style.backgroundPosition =
+      `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
 
-      e.preventDefault();
+    /* 초기 위치 */
+
+    piece.style.left =
+      Math.random() * 220 + "px";
+
+    piece.style.top =
+      Math.random() * 700 + "px";
+
+    panel.appendChild(piece);
+
+    /* 드래그 */
+
+    let isDragging = false;
+
+    let offsetX, offsetY;
+
+    piece.addEventListener("mousedown", e=>{
+
+      if(piece.classList.contains("fixed")) return;
+
+      isDragging = true;
+
+      piece.classList.add("dragging");
+
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
 
     });
 
-    /* 퍼즐 놓기 */
+    document.addEventListener("mousemove", e=>{
 
-    slot.addEventListener("drop", e=>{
+      if(!isDragging) return;
 
-      e.preventDefault();
+      const panelRect = panel.getBoundingClientRect();
 
-      const pieceId =
-        e.dataTransfer.getData("text/plain");
+      piece.style.left =
+        (e.clientX - panelRect.left - offsetX) + "px";
 
-      const piece =
-        document.getElementById(pieceId);
+      piece.style.top =
+        (e.clientY - panelRect.top - offsetY) + "px";
 
-      /* 정답 위치 체크 */
+    });
 
-      if(piece.dataset.index === slot.dataset.index){
+    document.addEventListener("mouseup", ()=>{
 
-        /* 이미 퍼즐 있으면 금지 */
+      if(!isDragging) return;
 
-        if(!slot.hasChildNodes()){
+      isDragging = false;
+
+      piece.classList.remove("dragging");
+
+      /* 슬롯 체크 */
+
+      slots.forEach(slot=>{
+
+        if(slot.dataset.index !== piece.dataset.index)
+          return;
+
+        const slotRect = slot.getBoundingClientRect();
+        const pieceRect = piece.getBoundingClientRect();
+
+        const centerX =
+          pieceRect.left + pieceRect.width / 2;
+
+        const centerY =
+          pieceRect.top + pieceRect.height / 2;
+
+        if(
+          centerX > slotRect.left &&
+          centerX < slotRect.right &&
+          centerY > slotRect.top &&
+          centerY < slotRect.bottom
+        ){
 
           slot.appendChild(piece);
 
           piece.classList.add("fixed");
 
-          piece.draggable = false;
-
           correct++;
-
-          /* 퍼즐 완성 */
 
           if(correct === total){
 
@@ -372,67 +403,15 @@ for(let y = 0; y < rows; y++){
 
         }
 
-      }
+      });
 
     });
-
-    frame.appendChild(slot);
 
   }
 
 }
 
-/* 퍼즐 생성 */
-
-for(let y = 0; y < rows; y++){
-
-  for(let x = 0; x < cols; x++){
-
-    const piece = document.createElement("div");
-
-    piece.className = "piece";
-
-    const index = y * cols + x;
-
-    piece.id = "piece-" + index;
-
-    piece.dataset.index = index;
-
-    piece.draggable = true;
-
-    /* 퍼즐 이미지 위치 */
-
-    piece.style.backgroundPosition =
-      `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
-
-    /* 드래그 시작 */
-
-    piece.addEventListener("dragstart", e=>{
-
-      e.dataTransfer.setData(
-        "text/plain",
-        piece.id
-      );
-
-      piece.classList.add("dragging");
-
-    });
-
-    /* 드래그 끝 */
-
-    piece.addEventListener("dragend", ()=>{
-
-      piece.classList.remove("dragging");
-
-    });
-
-    piecesPanel.appendChild(piece);
-
-  }
-
-}
-
-/* 완성 연출 */
+/* reveal */
 
 function reveal(){
 
