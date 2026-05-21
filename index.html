@@ -17,6 +17,7 @@
 body{
   width:100vw;
   height:100vh;
+
   overflow:hidden;
 
   background:#f5f5f5;
@@ -107,6 +108,8 @@ body{
 
   background-size:600% 400%;
 
+  background-repeat:no-repeat;
+
   box-shadow:
     0 5px 10px rgba(0,0,0,0.08);
 
@@ -132,6 +135,7 @@ body{
   height:100% !important;
 
   border:none;
+
   box-shadow:none;
 
   transform:none !important;
@@ -227,6 +231,30 @@ body{
   color:#666;
 }
 
+/* 모바일 */
+
+@media(max-width:900px){
+
+  body{
+    overflow:auto;
+  }
+
+  .container{
+    flex-direction:column;
+    padding:20px;
+  }
+
+  .frame{
+    width:95vw;
+  }
+
+  .pieces-panel{
+    width:100%;
+    height:250px;
+  }
+
+}
+
 </style>
 </head>
 
@@ -277,9 +305,9 @@ let correct = 0;
 
 /* 슬롯 생성 */
 
-for(let y=0; y<rows; y++){
+for(let y = 0; y < rows; y++){
 
-  for(let x=0; x<cols; x++){
+  for(let x = 0; x < cols; x++){
 
     const slot = document.createElement("div");
 
@@ -298,19 +326,31 @@ for(let y=0; y<rows; y++){
 
     slot.dataset.index = index;
 
+    /* 드래그 허용 */
+
     slot.addEventListener("dragover", e=>{
+
       e.preventDefault();
+
     });
+
+    /* 퍼즐 놓기 */
 
     slot.addEventListener("drop", e=>{
 
       e.preventDefault();
 
-      const pieceId = e.dataTransfer.getData("text");
+      const pieceId =
+        e.dataTransfer.getData("text/plain");
 
-      const piece = document.getElementById(pieceId);
+      const piece =
+        document.getElementById(pieceId);
+
+      /* 정답 위치 체크 */
 
       if(piece.dataset.index === slot.dataset.index){
+
+        /* 이미 퍼즐 있으면 금지 */
 
         if(!slot.hasChildNodes()){
 
@@ -321,6 +361,8 @@ for(let y=0; y<rows; y++){
           piece.draggable = false;
 
           correct++;
+
+          /* 퍼즐 완성 */
 
           if(correct === total){
 
@@ -342,9 +384,9 @@ for(let y=0; y<rows; y++){
 
 /* 퍼즐 생성 */
 
-for(let y=0; y<rows; y++){
+for(let y = 0; y < rows; y++){
 
-  for(let x=0; x<cols; x++){
+  for(let x = 0; x < cols; x++){
 
     const piece = document.createElement("div");
 
@@ -358,16 +400,25 @@ for(let y=0; y<rows; y++){
 
     piece.draggable = true;
 
+    /* 퍼즐 이미지 위치 */
+
     piece.style.backgroundPosition =
       `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
 
+    /* 드래그 시작 */
+
     piece.addEventListener("dragstart", e=>{
 
-      e.dataTransfer.setData("text/plain", piece.id);
+      e.dataTransfer.setData(
+        "text/plain",
+        piece.id
+      );
 
       piece.classList.add("dragging");
 
     });
+
+    /* 드래그 끝 */
 
     piece.addEventListener("dragend", ()=>{
 
@@ -381,7 +432,7 @@ for(let y=0; y<rows; y++){
 
 }
 
-/* reveal */
+/* 완성 연출 */
 
 function reveal(){
 
