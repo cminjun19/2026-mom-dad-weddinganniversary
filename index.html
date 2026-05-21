@@ -6,6 +6,7 @@
   <title>Mom & Dad Wedding Anniversary</title>
 
   <style>
+
     *{
       margin:0;
       padding:0;
@@ -28,8 +29,8 @@
       width:100%;
       height:100%;
       display:flex;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       padding:40px;
       gap:40px;
     }
@@ -52,29 +53,38 @@
       border:3px solid rgba(255,255,255,0.12);
       background:#0a0a0a;
       box-shadow:
-        0 0 30px rgba(255,255,255,0.03),
-        inset 0 0 30px rgba(255,255,255,0.03);
+        0 0 30px rgba(255,255,255,0.04),
+        inset 0 0 30px rgba(255,255,255,0.04);
+
+      overflow:hidden;
     }
+
+    /* 퍼즐 슬롯 */
 
     .slot{
       position:absolute;
-      border:1px solid rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.04);
     }
 
-    /* 퍼즐 패널 */
+    /* 오른쪽 퍼즐 창 */
 
     .pieces-panel{
       width:320px;
       height:90vh;
-      border:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.03);
-      backdrop-filter:blur(20px);
-      border-radius:24px;
+      border-radius:28px;
       padding:20px;
+
+      background:rgba(255,255,255,0.03);
+
+      border:1px solid rgba(255,255,255,0.08);
+
+      backdrop-filter:blur(20px);
+
       display:flex;
       flex-wrap:wrap;
       align-content:flex-start;
       gap:10px;
+
       overflow-y:auto;
     }
 
@@ -83,47 +93,60 @@
     .piece{
       width:60px;
       height:60px;
+
       background:#111;
+
       border:1px solid rgba(255,255,255,0.08);
+
       cursor:grab;
+
       transition:0.2s;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      color:#444;
+
       user-select:none;
     }
 
     .piece:hover{
       transform:scale(1.05);
-      box-shadow:0 0 15px rgba(255,255,255,0.1);
+
+      box-shadow:
+        0 0 15px rgba(255,255,255,0.1);
     }
 
     .piece.dragging{
       opacity:0.5;
     }
 
-    /* reveal */
+    /* 가족사진 */
 
     .photo{
       position:absolute;
+
       inset:0;
+
       width:100%;
       height:100%;
+
       object-fit:cover;
+
       opacity:0;
-      transition:2s;
+
+      transition:2s ease;
     }
 
     .frame.revealed .photo{
       opacity:1;
     }
 
+    /* 빛 효과 */
+
     .light{
       position:absolute;
       inset:0;
+
       background:white;
+
       opacity:0;
+
       pointer-events:none;
     }
 
@@ -132,28 +155,65 @@
     }
 
     @keyframes flash{
+
       0%{
         opacity:0;
       }
+
       40%{
         opacity:1;
       }
+
       100%{
         opacity:0;
       }
+
     }
+
+    /* 문구 */
 
     .message{
       position:absolute;
+
       bottom:-70px;
+
       left:50%;
+
       transform:translateX(-50%);
+
       font-size:18px;
+
       letter-spacing:2px;
+
       opacity:0.6;
     }
 
+    /* 모바일 */
+
+    @media(max-width:900px){
+
+      body{
+        overflow:auto;
+      }
+
+      .container{
+        flex-direction:column;
+        padding:20px;
+      }
+
+      .frame{
+        width:95vw;
+      }
+
+      .pieces-panel{
+        width:100%;
+        height:250px;
+      }
+
+    }
+
   </style>
+
 </head>
 
 <body>
@@ -166,13 +226,19 @@
 
       <div class="frame" id="frame">
 
+        <!-- 가족사진 -->
+
         <img
           class="photo"
-          src="family.jpg"
+          src="family.png"
           alt=""
         >
 
+        <!-- 빛 -->
+
         <div class="light"></div>
+
+        <!-- 문구 -->
 
         <div class="message">
           Put the memories back together
@@ -182,7 +248,7 @@
 
     </div>
 
-    <!-- 퍼즐 창 -->
+    <!-- 오른쪽 퍼즐 창 -->
 
     <div class="pieces-panel" id="piecesPanel"></div>
 
@@ -191,19 +257,21 @@
   <script>
 
     const frame = document.getElementById("frame");
+
     const piecesPanel = document.getElementById("piecesPanel");
 
     const cols = 6;
     const rows = 4;
+
     const total = cols * rows;
 
     let correctCount = 0;
 
-    // 슬롯 생성
+    /* 슬롯 생성 */
 
-    for(let y=0; y<rows; y++){
+    for(let y = 0; y < rows; y++){
 
-      for(let x=0; x<cols; x++){
+      for(let x = 0; x < cols; x++){
 
         const slot = document.createElement("div");
 
@@ -220,15 +288,16 @@
 
         slot.dataset.index = y * cols + x;
 
-        slot.addEventListener("dragover", e=>{
+        slot.addEventListener("dragover", e => {
           e.preventDefault();
         });
 
-        slot.addEventListener("drop", e=>{
+        slot.addEventListener("drop", e => {
 
           e.preventDefault();
 
           const pieceId = e.dataTransfer.getData("text");
+
           const piece = document.getElementById(pieceId);
 
           if(piece.dataset.index === slot.dataset.index){
@@ -266,9 +335,9 @@
 
     }
 
-    // 퍼즐 생성
+    /* 퍼즐 생성 */
 
-    for(let i=0; i<total; i++){
+    for(let i = 0; i < total; i++){
 
       const piece = document.createElement("div");
 
@@ -280,9 +349,13 @@
 
       piece.dataset.index = i;
 
-      piece.innerText = "";
+      // 랜덤 회전
 
-      piece.addEventListener("dragstart", e=>{
+      const rotate = Math.random() * 20 - 10;
+
+      piece.style.transform = `rotate(${rotate}deg)`;
+
+      piece.addEventListener("dragstart", e => {
 
         piece.classList.add("dragging");
 
@@ -290,7 +363,7 @@
 
       });
 
-      piece.addEventListener("dragend", ()=>{
+      piece.addEventListener("dragend", () => {
 
         piece.classList.remove("dragging");
 
@@ -300,17 +373,17 @@
 
     }
 
-    // reveal
+    /* reveal */
 
     function revealPhoto(){
 
       frame.classList.add("flash");
 
-      setTimeout(()=>{
+      setTimeout(() => {
 
         frame.classList.add("revealed");
 
-      },700);
+      }, 700);
 
     }
 
