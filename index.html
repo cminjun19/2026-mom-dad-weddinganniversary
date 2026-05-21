@@ -28,6 +28,8 @@ body{
   font-family:Arial, sans-serif;
 }
 
+/* 전체 */
+
 .container{
   width:100%;
   height:100%;
@@ -37,6 +39,7 @@ body{
   align-items:center;
 
   padding:40px;
+  gap:40px;
 }
 
 /* 액자 */
@@ -59,7 +62,7 @@ body{
     0 10px 40px rgba(0,0,0,0.08);
 }
 
-/* 슬롯 */
+/* 퍼즐 슬롯 */
 
 .slot{
   position:absolute;
@@ -67,7 +70,7 @@ body{
   border:1px solid rgba(0,0,0,0.05);
 }
 
-/* 퍼즐 창 */
+/* 퍼즐 패널 */
 
 .pieces-panel{
   width:320px;
@@ -135,6 +138,8 @@ body{
   opacity:0;
 
   transition:2s ease;
+
+  z-index:2;
 }
 
 .frame.revealed .full-photo{
@@ -147,29 +152,86 @@ body{
   position:absolute;
   inset:0;
 
-  background:white;
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.7) 30%,
+      rgba(255,255,255,0.2) 60%,
+      transparent 100%
+    );
 
   opacity:0;
 
+  transform:scale(0.8);
+
   pointer-events:none;
+
+  z-index:5;
 }
 
 .frame.active .flash{
   animation:flashAnim 1.5s ease;
+  filter:blur(20px);
 }
 
 @keyframes flashAnim{
 
   0%{
     opacity:0;
+    transform:scale(0.8);
   }
 
-  40%{
+  30%{
     opacity:1;
+    transform:scale(1.1);
   }
 
   100%{
     opacity:0;
+    transform:scale(1.4);
+  }
+
+}
+
+/* 문구 */
+
+.message{
+  position:absolute;
+
+  bottom:-70px;
+
+  left:50%;
+
+  transform:translateX(-50%);
+
+  font-size:16px;
+
+  letter-spacing:2px;
+
+  color:#666;
+}
+
+/* 모바일 */
+
+@media(max-width:900px){
+
+  body{
+    overflow:auto;
+  }
+
+  .container{
+    flex-direction:column;
+    padding:20px;
+  }
+
+  .frame{
+    width:95vw;
+  }
+
+  .pieces-panel{
+    width:100%;
+    height:250px;
   }
 
 }
@@ -185,12 +247,22 @@ body{
 
   <div class="frame" id="frame">
 
+    <!-- 빛 -->
+
+    <div class="flash"></div>
+
+    <!-- 완성 사진 -->
+
     <img
       src="family.png"
       class="full-photo"
     >
 
-    <div class="flash"></div>
+    <!-- 문구 -->
+
+    <div class="message">
+      Put the memories back together
+    </div>
 
   </div>
 
@@ -264,6 +336,8 @@ for(let y=0; y<rows; y++){
 
           correct++;
 
+          /* 마지막 퍼즐 완성 */
+
           if(correct === total){
 
             reveal();
@@ -335,7 +409,7 @@ function reveal(){
 
     frame.classList.add("revealed");
 
-  },700);
+  },500);
 
 }
 
