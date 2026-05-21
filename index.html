@@ -105,6 +105,10 @@ body{
   width:60px;
   height:60px;
 
+  position:relative;
+
+  flex-shrink:0;
+
   border:1px solid rgba(0,0,0,0.08);
 
   cursor:grab;
@@ -135,8 +139,12 @@ body{
 
 .piece.fixed{
   box-shadow:none !important;
+
   border:none !important;
+
   transform:none !important;
+
+  pointer-events:none;
 }
 
 /* 완성 사진 */
@@ -187,6 +195,7 @@ body{
 
 .frame.active .flash{
   animation:flashAnim 1.5s ease;
+
   filter:blur(20px);
 }
 
@@ -237,6 +246,7 @@ body{
 
   .container{
     flex-direction:column;
+
     padding:20px;
   }
 
@@ -246,6 +256,7 @@ body{
 
   .pieces-panel{
     width:100%;
+
     height:250px;
   }
 
@@ -292,8 +303,11 @@ body{
 
 <script>
 
-const frame = document.getElementById("frame");
-const piecesPanel = document.getElementById("piecesPanel");
+const frame =
+  document.getElementById("frame");
+
+const piecesPanel =
+  document.getElementById("piecesPanel");
 
 const cols = 6;
 const rows = 4;
@@ -308,7 +322,8 @@ for(let y=0; y<rows; y++){
 
   for(let x=0; x<cols; x++){
 
-    const slot = document.createElement("div");
+    const slot =
+      document.createElement("div");
 
     slot.classList.add("slot");
 
@@ -326,7 +341,9 @@ for(let y=0; y<rows; y++){
     slot.dataset.index = index;
 
     slot.addEventListener("dragover", e=>{
+
       e.preventDefault();
+
     });
 
     slot.addEventListener("drop", e=>{
@@ -347,6 +364,10 @@ for(let y=0; y<rows; y++){
 
           piece.style.width = "100%";
           piece.style.height = "100%";
+
+          piece.style.position = "absolute";
+          piece.style.left = "0";
+          piece.style.top = "0";
 
           piece.style.cursor = "default";
 
@@ -387,11 +408,14 @@ for(let y=0; y<rows; y++){
 
     piece.classList.add("piece");
 
-    const index = y * cols + x;
+    const index =
+      y * cols + x;
 
-    piece.id = "piece-" + index;
+    piece.id =
+      "piece-" + index;
 
-    piece.dataset.index = index;
+    piece.dataset.index =
+      index;
 
     piece.draggable = true;
 
@@ -404,7 +428,10 @@ for(let y=0; y<rows; y++){
 
       piece.classList.add("dragging");
 
-      e.dataTransfer.setData("text", piece.id);
+      e.dataTransfer.setData(
+        "text",
+        piece.id
+      );
 
     });
 
