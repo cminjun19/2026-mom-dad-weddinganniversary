@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mom & Dad Wedding Anniversary</title>
 
   <style>
@@ -13,111 +13,308 @@
     }
 
     body{
-      font-family: Arial, sans-serif;
-      background:#fff7f5;
-      color:#333;
-      text-align:center;
-    }
-
-    .hero{
+      width:100vw;
       height:100vh;
+      overflow:hidden;
+      background:#050505;
+      font-family:Arial, sans-serif;
       display:flex;
-      flex-direction:column;
       justify-content:center;
       align-items:center;
-      background:linear-gradient(to bottom,#ffe4e1,#fff);
-      padding:20px;
+      color:white;
     }
 
-    h1{
-      font-size:3rem;
-      margin-bottom:20px;
-    }
-
-    .subtitle{
-      font-size:1.2rem;
-      margin-bottom:30px;
-    }
-
-    .photo img{
-      width:320px;
-      max-width:90%;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .letter{
-      max-width:700px;
-      margin:auto;
-      padding:100px 20px;
-      line-height:2;
-      font-size:1.1rem;
-    }
-
-    .timeline{
-      padding:80px 20px;
-      background:white;
-    }
-
-    .timeline h2{
-      margin-bottom:40px;
-      font-size:2rem;
-    }
-
-    .timeline-item{
-      margin:20px 0;
-      font-size:1.1rem;
-    }
-
-    footer{
+    .container{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       padding:40px;
-      background:#ffe4e1;
-      font-size:1rem;
+      gap:40px;
     }
+
+    /* 액자 영역 */
+
+    .frame-area{
+      flex:1;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+    }
+
+    .frame{
+      width:70vw;
+      max-width:1100px;
+      aspect-ratio:16/9;
+      position:relative;
+      border:3px solid rgba(255,255,255,0.12);
+      background:#0a0a0a;
+      box-shadow:
+        0 0 30px rgba(255,255,255,0.03),
+        inset 0 0 30px rgba(255,255,255,0.03);
+    }
+
+    .slot{
+      position:absolute;
+      border:1px solid rgba(255,255,255,0.05);
+    }
+
+    /* 퍼즐 패널 */
+
+    .pieces-panel{
+      width:320px;
+      height:90vh;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+      backdrop-filter:blur(20px);
+      border-radius:24px;
+      padding:20px;
+      display:flex;
+      flex-wrap:wrap;
+      align-content:flex-start;
+      gap:10px;
+      overflow-y:auto;
+    }
+
+    /* 퍼즐 조각 */
+
+    .piece{
+      width:60px;
+      height:60px;
+      background:#111;
+      border:1px solid rgba(255,255,255,0.08);
+      cursor:grab;
+      transition:0.2s;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:#444;
+      user-select:none;
+    }
+
+    .piece:hover{
+      transform:scale(1.05);
+      box-shadow:0 0 15px rgba(255,255,255,0.1);
+    }
+
+    .piece.dragging{
+      opacity:0.5;
+    }
+
+    /* reveal */
+
+    .photo{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:0;
+      transition:2s;
+    }
+
+    .frame.revealed .photo{
+      opacity:1;
+    }
+
+    .light{
+      position:absolute;
+      inset:0;
+      background:white;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .frame.flash .light{
+      animation:flash 1.5s ease;
+    }
+
+    @keyframes flash{
+      0%{
+        opacity:0;
+      }
+      40%{
+        opacity:1;
+      }
+      100%{
+        opacity:0;
+      }
+    }
+
+    .message{
+      position:absolute;
+      bottom:-70px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:18px;
+      letter-spacing:2px;
+      opacity:0.6;
+    }
+
   </style>
 </head>
 
 <body>
 
-  <section class="hero">
-    <h1>Happy Wedding Anniversary ❤️</h1>
+  <div class="container">
 
-    <p class="subtitle">
-      Thank you for always protecting our family.
-    </p>
+    <!-- 액자 -->
 
-    <div class="photo">
-      <img src="parents.jpg" alt="parents">
+    <div class="frame-area">
+
+      <div class="frame" id="frame">
+
+        <img
+          class="photo"
+          src="family.jpg"
+          alt=""
+        >
+
+        <div class="light"></div>
+
+        <div class="message">
+          Put the memories back together
+        </div>
+
+      </div>
+
     </div>
-  </section>
 
-  <section class="timeline">
-    <h2>Our Family Story</h2>
+    <!-- 퍼즐 창 -->
 
-    <div class="timeline-item">💍 2001 — Mom & Dad got married</div>
-    <div class="timeline-item">🏠 2005 — Started our family</div>
-    <div class="timeline-item">❤️ 2026 — Still together with love</div>
-  </section>
+    <div class="pieces-panel" id="piecesPanel"></div>
 
-  <section class="letter">
-    <h2>Dear Mom & Dad</h2>
+  </div>
 
-    <p>
-      Thank you for your endless love and sacrifice.
-      Because of you, our family could always smile.
-      I hope you stay healthy and happy forever.
-    </p>
+  <script>
 
-    <br>
+    const frame = document.getElementById("frame");
+    const piecesPanel = document.getElementById("piecesPanel");
 
-    <p>
-      I love you ❤️
-    </p>
-  </section>
+    const cols = 6;
+    const rows = 4;
+    const total = cols * rows;
 
-  <footer>
-    Made with love for Mom & Dad
-  </footer>
+    let correctCount = 0;
+
+    // 슬롯 생성
+
+    for(let y=0; y<rows; y++){
+
+      for(let x=0; x<cols; x++){
+
+        const slot = document.createElement("div");
+
+        slot.classList.add("slot");
+
+        const w = 100 / cols;
+        const h = 100 / rows;
+
+        slot.style.width = w + "%";
+        slot.style.height = h + "%";
+
+        slot.style.left = x * w + "%";
+        slot.style.top = y * h + "%";
+
+        slot.dataset.index = y * cols + x;
+
+        slot.addEventListener("dragover", e=>{
+          e.preventDefault();
+        });
+
+        slot.addEventListener("drop", e=>{
+
+          e.preventDefault();
+
+          const pieceId = e.dataTransfer.getData("text");
+          const piece = document.getElementById(pieceId);
+
+          if(piece.dataset.index === slot.dataset.index){
+
+            if(!slot.hasChildNodes()){
+
+              slot.appendChild(piece);
+
+              piece.style.width = "100%";
+              piece.style.height = "100%";
+
+              piece.style.cursor = "default";
+
+              piece.draggable = false;
+
+              correctCount++;
+
+              // 마지막 퍼즐 완성
+
+              if(correctCount === total){
+
+                revealPhoto();
+
+              }
+
+            }
+
+          }
+
+        });
+
+        frame.appendChild(slot);
+
+      }
+
+    }
+
+    // 퍼즐 생성
+
+    for(let i=0; i<total; i++){
+
+      const piece = document.createElement("div");
+
+      piece.classList.add("piece");
+
+      piece.id = "piece-" + i;
+
+      piece.draggable = true;
+
+      piece.dataset.index = i;
+
+      piece.innerText = "";
+
+      piece.addEventListener("dragstart", e=>{
+
+        piece.classList.add("dragging");
+
+        e.dataTransfer.setData("text", piece.id);
+
+      });
+
+      piece.addEventListener("dragend", ()=>{
+
+        piece.classList.remove("dragging");
+
+      });
+
+      piecesPanel.appendChild(piece);
+
+    }
+
+    // reveal
+
+    function revealPhoto(){
+
+      frame.classList.add("flash");
+
+      setTimeout(()=>{
+
+        frame.classList.add("revealed");
+
+      },700);
+
+    }
+
+  </script>
 
 </body>
 </html>
