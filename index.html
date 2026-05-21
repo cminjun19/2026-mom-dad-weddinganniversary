@@ -1,432 +1,345 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mom & Dad Wedding Anniversary</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <style>
+<title>Wedding Anniversary</title>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
+<style>
 
-    body{
-      width:100vw;
-      height:100vh;
-      overflow:hidden;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-      background:#f5f5f5;
+body{
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
 
-      font-family:Arial, sans-serif;
+  background:#f5f5f5;
 
-      display:flex;
-      justify-content:center;
-      align-items:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 
-      color:#111;
-    }
+  font-family:Arial, sans-serif;
+}
 
-    .container{
-      width:100%;
-      height:100%;
+.container{
+  width:100%;
+  height:100%;
 
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 
-      padding:40px;
-      gap:40px;
-    }
+  padding:40px;
+}
 
-    /* 액자 영역 */
+/* 액자 */
 
-    .frame-area{
-      flex:1;
+.frame{
+  width:70vw;
+  max-width:1100px;
 
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+  aspect-ratio:16/9;
 
-    .frame{
-      width:70vw;
-      max-width:1100px;
+  position:relative;
 
-      aspect-ratio:16/9;
+  background:white;
 
-      position:relative;
+  border:2px solid rgba(0,0,0,0.08);
 
-      border:2px solid rgba(0,0,0,0.08);
+  overflow:hidden;
 
-      background:white;
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.08);
+}
 
-      overflow:hidden;
+/* 슬롯 */
 
-      box-shadow:
-        0 10px 40px rgba(0,0,0,0.08),
-        inset 0 0 20px rgba(0,0,0,0.03);
-    }
+.slot{
+  position:absolute;
 
-    /* 퍼즐 슬롯 */
+  border:1px solid rgba(0,0,0,0.05);
+}
 
-    .slot{
-      position:absolute;
+/* 퍼즐 창 */
 
-      border:1px solid rgba(0,0,0,0.04);
+.pieces-panel{
+  width:320px;
+  height:90vh;
 
-      transition:0.2s;
-    }
+  background:white;
 
-    .slot.hovered{
-      background:rgba(0,0,0,0.03);
-    }
+  border-radius:30px;
 
-    /* 가족사진 */
+  padding:20px;
 
-    .photo{
-      position:absolute;
-      inset:0;
+  border:1px solid rgba(0,0,0,0.08);
 
-      width:100%;
-      height:100%;
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
 
-      object-fit:cover;
+  gap:10px;
 
-      opacity:0;
+  overflow-y:auto;
 
-      transition:2s ease;
-    }
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.05);
+}
 
-    .frame.revealed .photo{
-      opacity:1;
-    }
+/* 퍼즐 조각 */
 
-    /* 빛 효과 */
+.piece{
+  width:60px;
+  height:60px;
 
-    .light{
-      position:absolute;
-      inset:0;
+  border:1px solid rgba(0,0,0,0.08);
 
-      background:white;
+  cursor:grab;
 
-      opacity:0;
+  background-image:url("family.png");
 
-      pointer-events:none;
-    }
+  background-size:600% 400%;
 
-    .frame.flash .light{
-      animation:flash 1.5s ease;
-    }
+  transition:0.2s;
 
-    @keyframes flash{
+  box-shadow:
+    0 5px 10px rgba(0,0,0,0.08);
+}
 
-      0%{
-        opacity:0;
-      }
+.piece:hover{
+  transform:scale(1.05);
+}
 
-      40%{
-        opacity:1;
-      }
+.piece.dragging{
+  opacity:0.5;
+}
 
-      100%{
-        opacity:0;
-      }
+/* 완성 사진 */
 
-    }
+.full-photo{
+  position:absolute;
+  inset:0;
 
-    /* 문구 */
+  width:100%;
+  height:100%;
 
-    .message{
-      position:absolute;
+  object-fit:cover;
 
-      bottom:-70px;
+  opacity:0;
 
-      left:50%;
+  transition:2s ease;
+}
 
-      transform:translateX(-50%);
+.frame.revealed .full-photo{
+  opacity:1;
+}
 
-      font-size:16px;
+/* 빛 효과 */
 
-      letter-spacing:2px;
+.flash{
+  position:absolute;
+  inset:0;
 
-      color:#666;
-    }
+  background:white;
 
-    /* 오른쪽 퍼즐 창 */
+  opacity:0;
 
-    .pieces-panel{
-      width:320px;
-      height:90vh;
+  pointer-events:none;
+}
 
-      background:rgba(255,255,255,0.7);
+.frame.active .flash{
+  animation:flashAnim 1.5s ease;
+}
 
-      border:1px solid rgba(0,0,0,0.08);
+@keyframes flashAnim{
 
-      border-radius:28px;
+  0%{
+    opacity:0;
+  }
 
-      backdrop-filter:blur(20px);
+  40%{
+    opacity:1;
+  }
 
-      padding:20px;
+  100%{
+    opacity:0;
+  }
 
-      display:flex;
-      flex-wrap:wrap;
-      align-content:flex-start;
+}
 
-      gap:10px;
-
-      overflow-y:auto;
-
-      box-shadow:
-        0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    /* 퍼즐 조각 */
-
-    .piece{
-      width:60px;
-      height:60px;
-
-      background:#fafafa;
-
-      border:1px solid rgba(0,0,0,0.08);
-
-      cursor:grab;
-
-      transition:0.2s;
-
-      user-select:none;
-
-      box-shadow:
-        0 4px 10px rgba(0,0,0,0.05);
-    }
-
-    .piece:hover{
-      transform:scale(1.05);
-
-      box-shadow:
-        0 10px 20px rgba(0,0,0,0.08);
-    }
-
-    .piece.dragging{
-      opacity:0.5;
-    }
-
-    /* 모바일 */
-
-    @media(max-width:900px){
-
-      body{
-        overflow:auto;
-      }
-
-      .container{
-        flex-direction:column;
-        padding:20px;
-      }
-
-      .frame{
-        width:95vw;
-      }
-
-      .pieces-panel{
-        width:100%;
-        height:250px;
-      }
-
-    }
-
-  </style>
-
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <!-- 액자 -->
+  <!-- 액자 -->
 
-    <div class="frame-area">
+  <div class="frame" id="frame">
 
-      <div class="frame" id="frame">
+    <img
+      src="family.png"
+      class="full-photo"
+    >
 
-        <!-- 가족사진 -->
-
-        <img
-          class="photo"
-          src="family.png"
-          alt=""
-        >
-
-        <!-- 빛 -->
-
-        <div class="light"></div>
-
-        <!-- 문구 -->
-
-        <div class="message">
-          Put the memories back together
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- 퍼즐 창 -->
-
-    <div class="pieces-panel" id="piecesPanel"></div>
+    <div class="flash"></div>
 
   </div>
 
-  <script>
+  <!-- 퍼즐창 -->
 
-    const frame = document.getElementById("frame");
-    const piecesPanel = document.getElementById("piecesPanel");
+  <div class="pieces-panel" id="piecesPanel"></div>
 
-    const cols = 6;
-    const rows = 4;
+</div>
 
-    const total = cols * rows;
+<script>
 
-    let correctCount = 0;
+const frame = document.getElementById("frame");
+const piecesPanel = document.getElementById("piecesPanel");
 
-    /* 슬롯 생성 */
+const cols = 6;
+const rows = 4;
 
-    for(let y = 0; y < rows; y++){
+const total = cols * rows;
 
-      for(let x = 0; x < cols; x++){
+let correct = 0;
 
-        const slot = document.createElement("div");
+/* 슬롯 생성 */
 
-        slot.classList.add("slot");
+for(let y=0; y<rows; y++){
 
-        const w = 100 / cols;
-        const h = 100 / rows;
+  for(let x=0; x<cols; x++){
 
-        slot.style.width = w + "%";
-        slot.style.height = h + "%";
+    const slot = document.createElement("div");
 
-        slot.style.left = x * w + "%";
-        slot.style.top = y * h + "%";
+    slot.classList.add("slot");
 
-        slot.dataset.index = y * cols + x;
+    const w = 100 / cols;
+    const h = 100 / rows;
 
-        slot.addEventListener("dragover", e => {
+    slot.style.width = w + "%";
+    slot.style.height = h + "%";
 
-          e.preventDefault();
+    slot.style.left = x * w + "%";
+    slot.style.top = y * h + "%";
 
-          slot.classList.add("hovered");
+    const index = y * cols + x;
 
-        });
+    slot.dataset.index = index;
 
-        slot.addEventListener("dragleave", () => {
+    slot.addEventListener("dragover", e=>{
+      e.preventDefault();
+    });
 
-          slot.classList.remove("hovered");
+    slot.addEventListener("drop", e=>{
 
-        });
+      e.preventDefault();
 
-        slot.addEventListener("drop", e => {
+      const pieceId = e.dataTransfer.getData("text");
 
-          e.preventDefault();
+      const piece = document.getElementById(pieceId);
 
-          slot.classList.remove("hovered");
+      if(piece.dataset.index === slot.dataset.index){
 
-          const pieceId = e.dataTransfer.getData("text");
+        if(!slot.hasChildNodes()){
 
-          const piece = document.getElementById(pieceId);
+          slot.appendChild(piece);
 
-          if(piece.dataset.index === slot.dataset.index){
+          piece.style.width = "100%";
+          piece.style.height = "100%";
 
-            if(!slot.hasChildNodes()){
+          piece.style.cursor = "default";
 
-              slot.appendChild(piece);
+          piece.draggable = false;
 
-              piece.style.width = "100%";
-              piece.style.height = "100%";
+          piece.style.transform = "scale(1)";
 
-              piece.style.transform = "rotate(0deg)";
+          correct++;
 
-              piece.style.cursor = "default";
+          if(correct === total){
 
-              piece.draggable = false;
-
-              correctCount++;
-
-              // 마지막 퍼즐 완성
-
-              if(correctCount === total){
-
-                revealPhoto();
-
-              }
-
-            }
+            reveal();
 
           }
 
-        });
-
-        frame.appendChild(slot);
+        }
 
       }
 
-    }
+    });
 
-    /* 퍼즐 생성 */
+    frame.appendChild(slot);
 
-    for(let i = 0; i < total; i++){
+  }
 
-      const piece = document.createElement("div");
+}
 
-      piece.classList.add("piece");
+/* 퍼즐 생성 */
 
-      piece.id = "piece-" + i;
+for(let y=0; y<rows; y++){
 
-      piece.draggable = true;
+  for(let x=0; x<cols; x++){
 
-      piece.dataset.index = i;
+    const piece = document.createElement("div");
 
-      // 랜덤 회전
+    piece.classList.add("piece");
 
-      const rotate = Math.random() * 20 - 10;
+    const index = y * cols + x;
 
-      piece.style.transform = `rotate(${rotate}deg)`;
+    piece.id = "piece-" + index;
 
-      piece.addEventListener("dragstart", e => {
+    piece.dataset.index = index;
 
-        piece.classList.add("dragging");
+    piece.draggable = true;
 
-        e.dataTransfer.setData("text", piece.id);
+    /* 이미지 위치 */
 
-      });
+    piece.style.backgroundPosition =
+      `${(x/(cols-1))*100}% ${(y/(rows-1))*100}%`;
 
-      piece.addEventListener("dragend", () => {
+    piece.addEventListener("dragstart", e=>{
 
-        piece.classList.remove("dragging");
+      piece.classList.add("dragging");
 
-      });
+      e.dataTransfer.setData("text", piece.id);
 
-      piecesPanel.appendChild(piece);
+    });
 
-    }
+    piece.addEventListener("dragend", ()=>{
 
-    /* reveal */
+      piece.classList.remove("dragging");
 
-    function revealPhoto(){
+    });
 
-      frame.classList.add("flash");
+    piecesPanel.appendChild(piece);
 
-      setTimeout(() => {
+  }
 
-        frame.classList.add("revealed");
+}
 
-      }, 700);
+/* reveal */
 
-    }
+function reveal(){
 
-  </script>
+  frame.classList.add("active");
+
+  setTimeout(()=>{
+
+    frame.classList.add("revealed");
+
+  },700);
+
+}
+
+</script>
 
 </body>
 </html>
