@@ -14,6 +14,10 @@
   box-sizing:border-box;
 }
 
+img{
+  pointer-events:none;
+}
+
 body{
   width:100vw;
   height:100vh;
@@ -68,6 +72,8 @@ body{
   position:absolute;
 
   border:1px solid rgba(0,0,0,0.05);
+
+  overflow:hidden;
 }
 
 /* 퍼즐 패널 */
@@ -116,6 +122,10 @@ body{
 
   box-shadow:
     0 5px 10px rgba(0,0,0,0.08);
+
+  -webkit-user-drag:none;
+
+  user-select:none;
 }
 
 .piece:hover{
@@ -309,12 +319,16 @@ for(let y=0; y<rows; y++){
 
     slot.dataset.index = index;
 
-    /* 드래그 허용 */
+    /* 드롭 허용 */
+
     slot.addEventListener("dragover", e=>{
+
       e.preventDefault();
+
     });
 
     /* 드롭 */
+
     slot.addEventListener("drop", e=>{
 
       e.preventDefault();
@@ -336,13 +350,17 @@ for(let y=0; y<rows; y++){
 
           piece.style.cursor = "default";
 
-          piece.draggable = false;
-
           piece.style.transform = "scale(1)";
+
+          piece.style.border = "none";
+
+          piece.style.boxShadow = "none";
+
+          piece.draggable = false;
 
           correct++;
 
-          /* 마지막 퍼즐 완성 */
+          /* 완성 */
 
           if(correct === total){
 
@@ -378,7 +396,7 @@ for(let y=0; y<rows; y++){
 
     piece.dataset.index = index;
 
-    /* ⭐⭐⭐ 핵심 드래그 기능 */
+    /* 드래그 가능 */
 
     piece.setAttribute("draggable","true");
 
@@ -395,6 +413,8 @@ for(let y=0; y<rows; y++){
 
       e.dataTransfer.effectAllowed = "move";
 
+      e.dataTransfer.dropEffect = "move";
+
       e.dataTransfer.setData(
         "text/plain",
         piece.id
@@ -402,7 +422,7 @@ for(let y=0; y<rows; y++){
 
     });
 
-    /* 드래그 종료 */
+    /* 드래그 끝 */
 
     piece.addEventListener("dragend", ()=>{
 
